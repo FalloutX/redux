@@ -10,72 +10,74 @@ The data lifecycle in any Redux app follows these 4 steps:
 
 1. **You call** [`store.dispatch(action)`](../api/Store.md#dispatch).
 
-  An action is a plain object describing *what happened*. For example:
+  An [action](Actions.md) is a plain object describing *what happened*. For example:
 
     ```js
-    { type: 'LIKE_ARTICLE', articleId: 42 };
-    { type: 'FETCH_USER_SUCCESS', response: { id: 3, name: 'Megan' } };
-    { type: 'ADD_TODO', text: 'Read the Redux docs.'};
+    { type: 'LIKE_ARTICLE', articleId: 42 }
+    { type: 'FETCH_USER_SUCCESS', response: { id: 3, name: 'Mary' } }
+    { type: 'ADD_TODO', text: 'Read the Redux docs.' }
     ```
 
-  Think of an action as a very brief snippet of news. “Mary liked article 42.” or “‘Read the Redux docs.’ was added to the list of todos.”
+  Think of an action as a very brief snippet of news. “Mary liked article 42.” or “‘Read the Redux docs.' was added to the list of todos.”
 
   You can call [`store.dispatch(action)`](../api/Store.md#dispatch) from anywhere in your app, including components and XHR callbacks, or even at scheduled intervals.
 
 2. **The Redux store calls the reducer function you gave it.**
 
-  The store will pass two arguments to the reducer, the current state tree and the action. For example, in the todo app, the root reducer might receive something like this:
+  The [store](Store.md) will pass two arguments to the [reducer](Reducers.md): the current state tree and the action. For example, in the todo app, the root reducer might receive something like this:
 
     ```js
     // The current application state (list of todos and chosen filter)
     let previousState = {
       visibleTodoFilter: 'SHOW_ALL',
-      todos: [{
-        text: 'Read the docs.',
-        complete: false
-      }]
-    };
+      todos: [ 
+        {
+          text: 'Read the docs.',
+          complete: false
+        }
+      ]
+    }
 
     // The action being performed (adding a todo)
     let action = {
       type: 'ADD_TODO',
       text: 'Understand the flow.'
-    };
+    }
 
     // Your reducer returns the next application state
-    let nextState = todoApp(previousState, action);
+    let nextState = todoApp(previousState, action)
     ```
 
-    Note that a reducer is a pure function. It only *computes* the next state. It should be completely predictable: calling it with the same inputs many times should produce the same outputs. It shouldn’t perform any side effects like API calls or router transitions. These should happen before an action is dispatched.
+    Note that a reducer is a pure function. It only *computes* the next state. It should be completely predictable: calling it with the same inputs many times should produce the same outputs. It shouldn't perform any side effects like API calls or router transitions. These should happen before an action is dispatched.
 
 3. **The root reducer may combine the output of multiple reducers into a single state tree.**
 
   How you structure the root reducer is completely up to you. Redux ships with a [`combineReducers()`](../api/combineReducers.md) helper function, useful for “splitting” the root reducer into separate functions that each manage one branch of the state tree.
 
-  Here’s how [`combineReducers()`](../api/combineReducers.md) works. Let’s say you have two reducers, one for a list of todos, and another for the currently selected filter setting:
+  Here's how [`combineReducers()`](../api/combineReducers.md) works. Let's say you have two reducers, one for a list of todos, and another for the currently selected filter setting:
 
     ```js
     function todos(state = [], action) {
       // Somehow calculate it...
-      return nextState;
+      return nextState
     }
 
     function visibleTodoFilter(state = 'SHOW_ALL', action) {
       // Somehow calculate it...
-      return nextState;
+      return nextState
     }
 
     let todoApp = combineReducers({
       todos,
       visibleTodoFilter
-    });
+    })
     ```
 
   When you emit an action, `todoApp` returned by `combineReducers` will call both reducers:
 
     ```js
-    let nextTodos = todos(state.todos, action);
-    let nextVisibleTodoFilter = visibleTodoFilter(state.visibleTodoFilter, action);
+    let nextTodos = todos(state.todos, action)
+    let nextVisibleTodoFilter = visibleTodoFilter(state.visibleTodoFilter, action)
     ```
 
   It will then combine both sets of results into a single state tree:
@@ -84,10 +86,10 @@ The data lifecycle in any Redux app follows these 4 steps:
     return {
       todos: nextTodos,
       visibleTodoFilter: nextVisibleTodoFilter
-    };
+    }
     ```
 
-  While [`combineReducers()`](../api/combineReducers.md) is a handy helper utility, you don’t have to use it; feel free to write your own root reducer!
+  While [`combineReducers()`](../api/combineReducers.md) is a handy helper utility, you don't have to use it; feel free to write your own root reducer!
 
 4. **The Redux store saves the complete state tree returned by the root reducer.**
 
@@ -97,7 +99,7 @@ The data lifecycle in any Redux app follows these 4 steps:
 
 ## Next Steps
 
-Now that you know how Redux works, let’s [connect it to a React app](UsageWithReact.md).
+Now that you know how Redux works, let's [connect it to a React app](UsageWithReact.md).
 
 >##### Note for Advanced Users
->If you’re already familiar with the basic concepts and have previously completed this tutorial, don’t forget to check out [async flow](../advanced/AsyncFlow.md) in the [advanced tutorial](../advanced/README.md) to learn how middleware transforms [async actions](../advanced/AsyncActions.md) before they reach the reducer.
+>If you're already familiar with the basic concepts and have previously completed this tutorial, don't forget to check out [async flow](../advanced/AsyncFlow.md) in the [advanced tutorial](../advanced/README.md) to learn how middleware transforms [async actions](../advanced/AsyncActions.md) before they reach the reducer.

@@ -1,84 +1,73 @@
-import React, { Component, PropTypes } from 'react';
-import { connect } from 'react-redux';
-import Explore from '../components/Explore';
-import { resetErrorMessage } from '../actions';
+import React, { Component, PropTypes } from 'react'
+import { connect } from 'react-redux'
+import { browserHistory } from 'react-router'
+import Explore from '../components/Explore'
+import { resetErrorMessage } from '../actions'
 
 class App extends Component {
   constructor(props) {
-    super(props);
-    this.handleChange = this.handleChange.bind(this);
-    this.handleDismissClick = this.handleDismissClick.bind(this);
+    super(props)
+    this.handleChange = this.handleChange.bind(this)
+    this.handleDismissClick = this.handleDismissClick.bind(this)
   }
 
-  render() {
-    // Injected by React Router
-    const { location, children } = this.props;
-    const { pathname } = location;
-    const value = pathname.substring(1);
+  handleDismissClick(e) {
+    this.props.resetErrorMessage()
+    e.preventDefault()
+  }
 
-    return (
-      <div>
-        <Explore value={value}
-                 onChange={this.handleChange} />
-        <hr />
-        {this.renderErrorMessage()}
-        {children}
-      </div>
-    );
+  handleChange(nextValue) {
+    browserHistory.push(`/${nextValue}`)
   }
 
   renderErrorMessage() {
-    const { errorMessage } = this.props;
+    const { errorMessage } = this.props
     if (!errorMessage) {
-      return null;
+      return null
     }
 
     return (
       <p style={{ backgroundColor: '#e99', padding: 10 }}>
         <b>{errorMessage}</b>
         {' '}
-        (<a href='#'
+        (<a href="#"
             onClick={this.handleDismissClick}>
           Dismiss
         </a>)
       </p>
-    );
+    )
   }
 
-  handleDismissClick(e) {
-    this.props.resetErrorMessage();
-    e.preventDefault();
-  }
-
-  handleChange(nextValue) {
-    // Available thanks to contextTypes below
-    const { router } = this.context;
-    router.transitionTo(`/${nextValue}`);
+  render() {
+    const { children, inputValue } = this.props
+    return (
+      <div>
+        <Explore value={inputValue}
+                 onChange={this.handleChange} />
+        <hr />
+        {this.renderErrorMessage()}
+        {children}
+      </div>
+    )
   }
 }
 
 App.propTypes = {
+  // Injected by React Redux
   errorMessage: PropTypes.string,
-  location: PropTypes.shape({
-    pathname: PropTypes.string.isRequired
-  }),
-  params: PropTypes.shape({
-    userLogin: PropTypes.string,
-    repoName: PropTypes.string
-  }).isRequired
-};
-
-App.contextTypes = {
-  router: PropTypes.object.isRequired
-};
-
-function mapStateToProps(state) {
-  return {
-    errorMessage: state.errorMessage
-  };
+  resetErrorMessage: PropTypes.func.isRequired,
+  inputValue: PropTypes.string.isRequired,
+  // Injected by React Router
+  children: PropTypes.node
 }
 
-export default connect(
-  mapStateToProps,
-  { resetErrorMessage }
-)(App);
+function mapStateToProps(state, ownProps) {
+  return {
+    errorMessage: state.errorMessage,
+    inputValue: ownProps.location.pathname.substring(1)
+  }
+}
+
+export default connect(mapStateToProps, {
+  resetErrorMessage
+})(App)
